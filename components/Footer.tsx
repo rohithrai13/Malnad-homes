@@ -12,12 +12,12 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           
           <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center space-x-4 mb-8 group">
+            <div className="flex items-center gap-4 mb-8 group">
               {/* Modern Monogram Icon */}
-              <div className="relative h-14 w-14 bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl p-2.5 shadow-2xl shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
+              <div className="relative h-14 w-14 bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl p-2.5 shadow-2xl shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300 flex items-center justify-center">
                  <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full text-white">
-                    <path d="M4 28L12 14L20 28M14 28L22 14L36 28" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <circle cx="28" cy="12" r="3.5" fill="#fbbf24" />
+                    <path d="M6 30L14 12L22 30M16 30L24 12L34 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="28" cy="12" r="4" fill="#fbbf24" />
                  </svg>
               </div>
               <div className="flex flex-col -space-y-1">
