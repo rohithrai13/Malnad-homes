@@ -1,7 +1,7 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-// Guideline: Always use a new instance with the direct process.env.API_KEY reference
+// Guideline: Always use a new instance with the direct process.env.API_KEY || 'FAKE_API_KEY_FOR_DEVELOPMENT' reference
 // and create right before making an API call where possible.
 
 export const generateListingDescription = async (
