@@ -228,13 +228,18 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       <nav 
-        className={`fixed w-full z-50 transition-all duration-300 border-b ${
-          isSolid 
-            ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200/50 dark:border-slate-800/50 py-2 shadow-lg' 
-            : 'bg-transparent border-transparent py-4'
+        className={`fixed w-full z-50 transition-all duration-300 ${
+          isSolid ? 'py-2' : 'py-4'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Background Element - Applied separately to prevent stacking context clipping of fixed children */}
+        <div className={`absolute inset-0 w-full h-full pointer-events-none transition-all duration-300 border-b ${
+           isSolid 
+            ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-slate-200/50 dark:border-slate-800/50 shadow-lg' 
+            : 'bg-transparent border-transparent'
+        }`} />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex justify-between items-center h-14 md:h-16">
             
             {/* Logo Group */}
@@ -516,7 +521,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Side Drawer Mobile Menu Overlay */}
         {isMenuOpen && (
-          <div className="fixed inset-0 z-[60] lg:hidden">
+          <div className="fixed inset-0 z-[110] lg:hidden">
             {/* Dark Overlay - Closes menu on click */}
             <div 
               className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-fade-in"
