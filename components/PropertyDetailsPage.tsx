@@ -95,6 +95,11 @@ export const PropertyDetailsPage: React.FC<PropertyDetailsPageProps> = ({ proper
     return (total / reviews.length).toFixed(1);
   }, [reviews, property.rating]);
 
+  // Pricing Calculation
+  const serviceFee = Math.round(property.priceValue * 0.05);
+  const cleaningFee = Math.round(property.priceValue * 0.02);
+  const baseRent = property.priceValue - serviceFee - cleaningFee;
+
   const nextImage = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     setPreviewIndex((prev) => (prev !== null ? (prev + 1) % allImages.length : 0));
@@ -414,17 +419,21 @@ export const PropertyDetailsPage: React.FC<PropertyDetailsPageProps> = ({ proper
 
               <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
                  <div className="flex justify-between text-xs md:text-sm text-slate-500">
+                   <span>Base Rent</span>
+                   <span>₹{baseRent.toLocaleString()}</span>
+                 </div>
+                 <div className="flex justify-between text-xs md:text-sm text-slate-500">
                    <span>{t('property.serviceFee')}</span>
-                   <span>₹2,500</span>
+                   <span>₹{serviceFee.toLocaleString()}</span>
                  </div>
                  <div className="flex justify-between text-xs md:text-sm text-slate-500">
                    <span>{t('property.cleaningFee')}</span>
-                   <span>₹1,200</span>
+                   <span>₹{cleaningFee.toLocaleString()}</span>
                  </div>
                  <div className="h-px bg-slate-100 dark:bg-slate-800 my-2 md:my-4"></div>
                  <div className="flex justify-between text-slate-900 dark:text-white font-bold text-base md:text-lg">
                    <span>{t('property.totalLabel')}</span>
-                   <span className="text-emerald-600 dark:text-emerald-400">Quote</span>
+                   <span className="text-emerald-600 dark:text-emerald-400">{property.price}</span>
                  </div>
               </div>
 

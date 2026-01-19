@@ -3,7 +3,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ArrowLeft, Filter, MapPin, Search, Star, ChevronDown, 
   Navigation, Heart, ChevronLeft, ChevronRight, X, SlidersHorizontal,
-  ArrowUpDown, Check, Crosshair, Loader2, Wifi, Coffee, Car, Shield, Zap
+  ArrowUpDown, Check, Crosshair, Loader2, Wifi, Coffee, Car, Shield, Zap,
+  LayoutGrid, Home, Building2, Building, BedDouble, Users, User,
+  Utensils, Dumbbell, Shirt, ThermometerSun
 } from 'lucide-react';
 import { Property, GuestType, PropertyCategory } from '../types';
 import { Button } from './Button';
@@ -25,12 +27,24 @@ interface AllPropertiesPageProps {
 
 const PROPERTIES_PER_PAGE = 6;
 
+const AMENITY_ICONS: Record<string, React.ElementType> = {
+  'Wi-Fi': Wifi,
+  'AC': ThermometerSun, // Approximation
+  'Parking': Car,
+  'Food': Utensils,
+  'Power Backup': Zap,
+  'Security': Shield,
+  'Gym': Dumbbell,
+  'Laundry': Shirt,
+  'Hot Water': Coffee, // Approximation
+};
+
 const AMENITY_OPTIONS = [
   'Wi-Fi', 'AC', 'Parking', 'Food', 'Power Backup', 
   'Security', 'Gym', 'Laundry', 'Hot Water'
 ];
 
-// Helper to match amenities loosely (e.g. "High-Speed Wi-Fi" matches "Wi-Fi")
+// Helper to match amenities loosely
 const checkAmenityMatch = (propertyAmenities: string[], selected: string[]) => {
   if (selected.length === 0) return true;
   return selected.every(sel => 
@@ -53,7 +67,6 @@ const PropertyCard: React.FC<{ property: Property, onClick: () => void, distance
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isAuthenticated } = useAuth();
   const { openAuthModal } = useUI();
-  const { t } = useLanguage();
   const favorite = isFavorite(property.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
@@ -304,155 +317,179 @@ export const AllPropertiesPage: React.FC<AllPropertiesPageProps> = ({ onBack, in
     setMaxDistance(10);
   };
 
-  const FilterBoard = ({ isMobile = false }: { isMobile?: boolean }) => (
-    <div className={`space-y-8 ${isMobile ? 'p-6 pb-32' : ''}`}>
-      {!isMobile && (
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <SlidersHorizontal className="h-5 w-5 text-emerald-500" /> Filters
-          </h2>
-          <button onClick={handleReset} className="text-[10px] font-black text-slate-400 hover:text-emerald-500 uppercase tracking-widest transition-colors">Reset</button>
-        </div>
-      )}
+  const FilterBoard = ({ isMobile = false }: { isMobile?: boolean }) => {
+    const categories = [
+        { id: 'All', label: 'All', icon: LayoutGrid },
+        { id: 'Villa', label: 'Villa', icon: Home },
+        { id: 'PG', label: 'PG', icon: BedDouble },
+        { id: 'Apartment', label: 'Apt', icon: Building2 },
+        { id: 'Hostel', label: 'Hostel', icon: Building }
+    ];
 
-      {/* Location Section */}
-      <div className="space-y-3">
-        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Location & Radius</label>
-        
-        <div className="flex gap-2 items-center">
-           <div className="relative group flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400 group-focus-within:text-emerald-500 transition-colors duration-300" />
-            <input 
-              type="text" 
-              placeholder="Search area..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800/60 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 shadow-sm transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700 focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white dark:focus:bg-slate-950 outline-none"
-            />
+    const guestTypes = [
+        { id: 'All', label: 'All', icon: Users },
+        { id: 'Family', label: 'Family', icon: Users },
+        { id: 'Male', label: 'Male', icon: User },
+        { id: 'Female', label: 'Female', icon: User },
+    ];
+
+    return (
+      <div className={`space-y-8 ${isMobile ? 'p-6 pb-32' : ''}`}>
+        {!isMobile && (
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <SlidersHorizontal className="h-5 w-5 text-emerald-500" /> Filters
+            </h2>
+            <button onClick={handleReset} className="text-[10px] font-black text-slate-400 hover:text-emerald-500 uppercase tracking-widest transition-colors">Reset</button>
           </div>
-          <button 
-            onClick={handleNearMe}
-            disabled={isLocating}
-            className={`p-3.5 rounded-2xl border-2 transition-all duration-300 ${
-              userLocation 
-              ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/20 shadow-md' 
-              : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/60 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm'
-            }`}
-            title="Use my location"
-          >
-            {isLocating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Crosshair className="h-5 w-5" />}
-          </button>
+        )}
+
+        {/* Location Section */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Location & Radius</label>
+          
+          <div className="flex gap-2 items-center">
+             <div className="relative group flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400 group-focus-within:text-emerald-500 transition-colors duration-300" />
+              <input 
+                type="text" 
+                placeholder="Search area..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800/60 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 shadow-sm transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700 focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white dark:focus:bg-slate-950 outline-none"
+              />
+            </div>
+            <button 
+              onClick={handleNearMe}
+              disabled={isLocating}
+              className={`p-3.5 rounded-2xl border-2 transition-all duration-300 ${
+                userLocation 
+                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-600 dark:text-emerald-400 shadow-emerald-500/20 shadow-md' 
+                : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/60 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm'
+              }`}
+              title="Use my location"
+            >
+              {isLocating ? <Loader2 className="h-5 w-5 animate-spin" /> : <Crosshair className="h-5 w-5" />}
+            </button>
+          </div>
+
+          {/* Distance Slider */}
+          {userLocation && (
+            <div className="pt-2 animate-in fade-in slide-in-from-top-2">
+               <div className="flex justify-between items-center mb-2">
+                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Within {maxDistance} km</span>
+               </div>
+               <input 
+                  type="range" min="1" max="50" step="1"
+                  value={maxDistance} onChange={(e) => setMaxDistance(parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+               />
+               <div className="flex justify-between text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-widest">
+                 <span>1 km</span>
+                 <span>50 km</span>
+               </div>
+            </div>
+          )}
         </div>
 
-        {/* Distance Slider - Only visible if location is set */}
-        {userLocation && (
-          <div className="pt-2 animate-in fade-in slide-in-from-top-2">
-             <div className="flex justify-between items-center mb-2">
-               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Within {maxDistance} km</span>
-             </div>
-             <input 
-                type="range" min="1" max="50" step="1"
-                value={maxDistance} onChange={(e) => setMaxDistance(parseInt(e.target.value))}
-                className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-             />
-             <div className="flex justify-between text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-widest">
-               <span>1 km</span>
-               <span>50 km</span>
-             </div>
+        <div className="h-px bg-slate-100 dark:bg-slate-800"></div>
+
+        {/* Property Type Grid */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Type</label>
+          <div className="grid grid-cols-3 gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl text-xs font-bold transition-all border ${
+                  selectedCategory === cat.id
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-lg scale-[1.02]'
+                    : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-slate-300 dark:hover:border-slate-700'
+                }`}
+              >
+                <cat.icon className="h-4 w-4" />
+                {cat.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Guest Type Grid */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Who's Staying?</label>
+          <div className="grid grid-cols-4 gap-2">
+            {guestTypes.map(type => (
+              <button 
+                key={type.id}
+                onClick={() => setSelectedGender(type.id as any)}
+                className={`flex flex-col items-center justify-center gap-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                  selectedGender === type.id 
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md scale-[1.02]' 
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+              >
+                <type.icon className="h-4 w-4" />
+                {type.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Price Range */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-end">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Max Budget</label>
+            <span className="text-base font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-lg">₹{priceMax.toLocaleString()}</span>
+          </div>
+          <input 
+            type="range" min="2000" max="25000" step="500"
+            value={priceMax} onChange={(e) => setPriceMax(parseInt(e.target.value))}
+            className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+          />
+          <div className="flex justify-between text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+             <span>₹2k</span>
+             <span>₹25k+</span>
+          </div>
+        </div>
+
+        <div className="h-px bg-slate-100 dark:bg-slate-800"></div>
+
+        {/* Amenities Tags */}
+        <div className="space-y-3">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Amenities</label>
+          <div className="flex flex-wrap gap-2">
+            {AMENITY_OPTIONS.map(amenity => {
+              const isSelected = selectedAmenities.includes(amenity);
+              const Icon = AMENITY_ICONS[amenity] || Check;
+              return (
+                <button 
+                  key={amenity} 
+                  onClick={() => toggleAmenity(amenity)}
+                  className={`px-3 py-2.5 rounded-xl text-[11px] font-bold border transition-all flex items-center gap-2 ${
+                    isSelected
+                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-md transform scale-105'
+                    : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-emerald-500/50 hover:text-emerald-500'
+                  }`}
+                >
+                  <Icon className={`h-3.5 w-3.5 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
+                  {amenity}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 z-20">
+            <Button onClick={() => setIsFilterDrawerOpen(false)} className="w-full py-4 rounded-xl shadow-xl shadow-emerald-900/20 font-bold">
+              View {filteredProperties.length} Properties
+            </Button>
           </div>
         )}
       </div>
-
-      <div className="h-px bg-slate-100 dark:bg-slate-800"></div>
-
-      {/* Property Type Segmented Control */}
-      <div className="space-y-3">
-        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Type</label>
-        <div className="flex flex-wrap gap-2">
-          {['All', 'Villa', 'PG', 'Apartment', 'Hostel'].map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-                selectedCategory === cat
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent shadow-lg'
-                  : 'bg-transparent border-slate-200 dark:border-slate-800 text-slate-500 hover:border-slate-300 dark:hover:border-slate-700'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Guest Type */}
-      <div className="space-y-3">
-        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Who's Staying?</label>
-        <div className="grid grid-cols-4 gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-          {(['All', 'Family', 'Male', 'Female'] as const).map(type => (
-            <button 
-              key={type}
-              onClick={() => setSelectedGender(type)}
-              className={`py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                selectedGender === type 
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm scale-95' 
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
-            >
-              {type === 'All' ? 'Any' : type}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Price Range */}
-      <div className="space-y-4">
-        <div className="flex justify-between items-end">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Max Budget</label>
-          <span className="text-base font-black text-slate-900 dark:text-white">₹{priceMax.toLocaleString()}</span>
-        </div>
-        <input 
-          type="range" min="2000" max="25000" step="500"
-          value={priceMax} onChange={(e) => setPriceMax(parseInt(e.target.value))}
-          className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-        />
-      </div>
-
-      <div className="h-px bg-slate-100 dark:bg-slate-800"></div>
-
-      {/* Amenities Tags */}
-      <div className="space-y-3">
-        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block">Amenities</label>
-        <div className="flex flex-wrap gap-2">
-          {AMENITY_OPTIONS.map(amenity => {
-            const isSelected = selectedAmenities.includes(amenity);
-            return (
-              <button 
-                key={amenity} 
-                onClick={() => toggleAmenity(amenity)}
-                className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all flex items-center gap-1.5 ${
-                  isSelected
-                  ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                  : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 hover:border-slate-300'
-                }`}
-              >
-                {isSelected && <Check className="h-3 w-3 stroke-[3]" />}
-                {amenity}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 z-20">
-          <Button onClick={() => setIsFilterDrawerOpen(false)} className="w-full py-4 rounded-xl shadow-xl shadow-emerald-900/20 font-bold">
-            View {filteredProperties.length} Properties
-          </Button>
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 md:pt-28 pb-20 animate-in fade-in slide-in-from-bottom-4 text-slate-900 dark:text-white">
